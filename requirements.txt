@@ -1,0 +1,41 @@
+# ---------------------------------------------------------------------------
+# Core (always needed): content extraction + utilities
+# ---------------------------------------------------------------------------
+numpy>=1.24.0
+PyPDF2>=3.0.0
+python-docx>=0.8.11
+pytesseract>=0.3.10
+Pillow>=10.0.0
+python-pptx>=0.6.21
+openpyxl>=3.1.0
+chardet>=5.0.0
+tqdm>=4.65.0
+pyyaml>=6.0
+
+# ---------------------------------------------------------------------------
+# LLM backend (bring-your-own-key).
+# These are AUTO-INSTALLED on first use based on the provider you pick, so you
+# normally don't need to install them by hand (disable with --no-auto-install).
+# Listed here for offline/pinned installs:
+#   - anthropic : Claude
+#   - openai    : OpenAI AND every OpenAI-compatible vendor
+#                 (Gemini, Groq, Mistral, DeepSeek, Together, OpenRouter, Ollama)
+# ---------------------------------------------------------------------------
+anthropic>=0.40.0
+openai>=1.40.0
+
+# ---------------------------------------------------------------------------
+# Local backend (free, offline embeddings). LARGE download (~hundreds of MB
+# via torch). Only needed for `--backend local`; skip if you only use --backend llm.
+# ---------------------------------------------------------------------------
+sentence-transformers>=2.2.0
+torch>=2.0.0
+scikit-learn>=1.3.0
+
+# Optional: file monitoring
+watchdog>=3.0.0
+
+# ---------------------------------------------------------------------------
+# Dev/test only
+# ---------------------------------------------------------------------------
+pytest>=7.0.0

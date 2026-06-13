@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-file-organizer"
+version = "0.2.0"
+description = "AI-powered file organizer with a bring-your-own-key LLM backend (all providers) and a free local backend."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+keywords = ["file-organizer", "llm", "classification", "automation"]
+
+# Core dependencies: content extraction + utilities (always needed).
+dependencies = [
+    "numpy>=1.24.0",
+    "PyPDF2>=3.0.0",
+    "python-docx>=0.8.11",
+    "pytesseract>=0.3.10",
+    "Pillow>=10.0.0",
+    "python-pptx>=0.6.21",
+    "openpyxl>=3.1.0",
+    "chardet>=5.0.0",
+    "tqdm>=4.65.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+# LLM backend SDKs (also auto-installed on first use). `openai` covers every
+# OpenAI-compatible vendor (Gemini, Groq, Mistral, DeepSeek, Together, ...).
+llm = ["anthropic>=0.40.0", "openai>=1.40.0"]
+# Free, offline embedding backend (large — pulls in torch).
+local = ["sentence-transformers>=2.2.0", "torch>=2.0.0", "scikit-learn>=1.3.0"]
+dev = ["pytest>=7.0.0"]
+all = [
+    "anthropic>=0.40.0", "openai>=1.40.0",
+    "sentence-transformers>=2.2.0", "torch>=2.0.0", "scikit-learn>=1.3.0",
+    "pytest>=7.0.0",
+]
+
+[project.scripts]
+file-organizer = "main:main"
+
+[tool.setuptools]
+py-modules = ["main", "config", "cli", "trainer", "train"]
+packages = ["categories", "classifier", "extractors", "organizer", "llm"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
