@@ -195,4 +195,4 @@ pytest -q      # or just run the tests
 
 ### License
 
-MIT — see [LICENSE](LICENSE).
+Licensed under the Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0) — see [LICENSE](LICENSE). You may use and adapt this work for non-commercial purposes with attribution, but you may not sell it.
