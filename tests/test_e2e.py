@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# Required Notice: Copyright (c) 2026 George Zhang — https://github.com/TheYellowDuck
+
 """End-to-end: scan -> classify (stub LLM) -> move -> journal -> undo restores."""
 
 import json

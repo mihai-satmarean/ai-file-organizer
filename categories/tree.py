@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# Required Notice: Copyright (c) 2026 George Zhang — https://github.com/TheYellowDuck
+
 """
 Hierarchical category tree structure.
 Each node has a name, description (for embedding), confidence threshold, and children.
