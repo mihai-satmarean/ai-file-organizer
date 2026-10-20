@@ -214,7 +214,8 @@ class FileOrganizer:
         
         # Show classification summary
         category_counts = {}
-        for _, cat_path, _ in classifications:
+        for item in classifications:
+            cat_path = item[1]
             root = cat_path.split('/')[0]
             category_counts[root] = category_counts.get(root, 0) + 1
         
