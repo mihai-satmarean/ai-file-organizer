@@ -320,10 +320,12 @@ class LLMClassifier:
                 continue
 
         results: list[ClassificationResult] = []
+        missing_contents: list[tuple[int, ExtractedContent]] = []
+
         for i, content in enumerate(contents):
             entry = by_index.get(i)
             if entry is None:
-                results.append(self._fallback(content))
+                missing_contents.append((i, content))
                 continue
             path, is_other = self._normalize_path(str(entry.get("path", "")))
             try:
@@ -331,15 +333,12 @@ class LLMClassifier:
             except (ValueError, TypeError):
                 confidence = 0.0
             confidence = max(0.0, min(1.0, confidence))
-            # Route uncertain placements to a Review folder instead of filing them.
             if self.min_confidence > 0.0 and confidence < self.min_confidence:
                 path, is_other = self.review_folder, False
-            # Extract proposed rename if requested and the LLM returned one.
             new_name: Optional[str] = None
             if self._rename:
                 raw_name = str(entry.get("new_name", "")).strip().strip('"\'')
                 if raw_name and "/" not in raw_name and "\\" not in raw_name:
-                    # Ensure extension is preserved if LLM dropped it.
                     orig_ext = content.file_path.suffix
                     if orig_ext and not raw_name.endswith(orig_ext):
                         raw_name = raw_name.rsplit(".", 1)[0] + orig_ext
@@ -353,6 +352,15 @@ class LLMClassifier:
                 classification_chain=path.split("/"),
                 new_name=new_name,
             ))
+
+        # Retry files the LLM omitted from the batch response.
+        if missing_contents:
+            log.info("Retrying %d file(s) omitted from batch of %d.",
+                     len(missing_contents), len(contents))
+            for orig_idx, content in missing_contents:
+                retry_results = self._classify_one_batch([content])
+                results.insert(orig_idx, retry_results[0])
+
         return results
 
     @staticmethod
