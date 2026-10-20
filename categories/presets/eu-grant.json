@@ -20,7 +20,7 @@
       "children": [
         {"name": "Buget", "description": "Buget detaliat, Anexa 6, fisiere Excel buget, rezumat cheltuieli, categorii de cheltuieli eligibile", "threshold": 0.50},
         {"name": "Oferte_Semnate", "description": "Oferte de pret semnate, oferte stampilate, capturi de ecran semnate de reprezentantul legal, oferte furnizori cu semnatura", "threshold": 0.50},
-        {"name": "Oferte_Nesemnate", "description": "Oferte de pret nesemnate, capturi de ecran pret, screenshot-uri pagini web cu preturi, printscreen-uri", "threshold": 0.50}
+        {"name": "Oferte_Nesemnate", "description": "Oferte de pret nesemnate, capturi de ecran pret, screenshot-uri pagini web cu preturi hardware si software, printscreen-uri pricing pages, capturi echipamente server GPU workstation laptop switch firewall storage cloud, capturi licente SaaS", "threshold": 0.48}
       ]
     },
     {
@@ -29,7 +29,7 @@
       "threshold": 0.42,
       "children": [
         {"name": "Anexa8_Conflict", "description": "Anexa 8 declaratie conflict de interese, formular lipsa conflict, declaratie independenta, Anexa 19", "threshold": 0.50},
-        {"name": "Declaratii_Eligibilitate", "description": "Declaratii eligibilitate solicitant, declaratie IMM incadrare, declaratie ajutor de stat, decizia asociat unic", "threshold": 0.50}
+        {"name": "Declaratii_Eligibilitate", "description": "Declaratii eligibilitate solicitant, declaratie IMM incadrare, declaratie ajutor de stat, decizia asociat unic, declaratie efect stimulativ, declaratie conformitate, declaratie de angajament", "threshold": 0.50}
       ]
     },
     {
