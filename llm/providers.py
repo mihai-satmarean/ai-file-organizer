@@ -336,6 +336,7 @@ class OpenAICompatibleProvider(BaseProvider):
             api_key=key.value or "not-needed",
             base_url=resolved_base,
             max_retries=max_retries,
+            timeout=300.0,  # 5 min per request; avoids premature timeout on busy hosts
         )
 
     def complete_json(self, system: str, user, *,
