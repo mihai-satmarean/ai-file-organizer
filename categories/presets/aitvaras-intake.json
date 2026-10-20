@@ -1,0 +1,99 @@
+{
+  "_preset": "aitvaras-intake",
+  "_description": "Aitvaras personal document intake pipeline — German tax/accounting taxonomy with physical binder (Biblioraft) mapping. For Mihai Satmarean's family archive.",
+  "_source": "aitvaras/tools/intake/config.py DOCTYPE_MAP + BINDERS (2026)",
+  "_note": "Category names match the LLM doc_type taxonomy used by aitvaras router.py. Subfolders map to the physical binder sections (Biblioraft).",
+  "categories": [
+    {
+      "name": "Rechnungen_Eingang",
+      "description": "Incoming invoices and bills: Rechnung, Abrechnung from suppliers, utilities (SWM, Vodafone, Telekom), subscriptions, service providers, any document requesting payment FROM us. Facturi primite.",
+      "threshold": 0.42,
+      "children": [
+        {"name": "Utilities", "description": "SWM Stadtwerke, Vodafone, Telekom, internet, electricity, gas, water, Nebenkosten", "threshold": 0.50},
+        {"name": "Subscriptions", "description": "Software subscriptions, cloud services, JetBrains, Apple, Google, hosting, domain renewals", "threshold": 0.50},
+        {"name": "Inkasso", "description": "Collection notices, Inkasso, Mahnung, Vollstreckung, debt collection, Coeo, Infoscore, payment demands", "threshold": 0.50}
+      ]
+    },
+    {
+      "name": "Rechnungen_Ausgang",
+      "description": "Outgoing invoices we issued to clients: Rechnung, Gutschrift, credit notes, Odoo-generated invoices, freelance invoices to cloudWerkstatt, Toll Collect, ACDA, Skylite",
+      "threshold": 0.42
+    },
+    {
+      "name": "Kontoauszuege",
+      "description": "Bank account statements: Kontoauszug, monthly statements from HVB, N26, Wise, PayPal, DeGiro, transaction lists, Umsatzliste, SEPA overview",
+      "threshold": 0.45
+    },
+    {
+      "name": "Vertraege",
+      "description": "Contracts and agreements: Vertrag, Mietvertrag, Arbeitsvertrag, Dienstvertrag, NDA, SLA, Kooperationsvertrag, Aufhebungsvertrag, Zusatzvereinbarung, lease, rental, employment contracts",
+      "threshold": 0.42
+    },
+    {
+      "name": "Finanzamt",
+      "description": "Tax office correspondence: Finanzamt München, Steuerbescheid, Vorauszahlung, Einkommensteuer, Umsatzsteuer, Mahnungen, Vollstreckungsankündigung, Pfändung, Schätzung, Herr Lichtblau, Herr Panzer, Frau Winkler, Oliver Neumann, Aktenzeichen 146/185/51726",
+      "threshold": 0.40,
+      "children": [
+        {"name": "Bescheide", "description": "Steuerbescheid, Einkommensteuerbescheid, Vorauszahlungsbescheid, Gewerbesteuerbescheid, Bescheid über Säumniszuschläge", "threshold": 0.50},
+        {"name": "Vollstreckung", "description": "Vollstreckungsankündigung, Pfändungs- und Einziehungsverfügung, Mahnung, Mahngebühren, Zwangsvollstreckung, Aufhebung", "threshold": 0.50},
+        {"name": "Korrespondenz", "description": "Letters, Fragebogen, Beleganforderung, Arbeitszimmer questions, reply deadlines, general Finanzamt correspondence", "threshold": 0.50}
+      ]
+    },
+    {
+      "name": "Steuerbescheid",
+      "description": "Tax assessment notices specifically: Einkommensteuerbescheid, Gewerbesteuermessbescheid, Festsetzung, Nachzahlung, Erstattung. Distinct from general Finanzamt correspondence.",
+      "threshold": 0.45
+    },
+    {
+      "name": "Krankenkasse",
+      "description": "Health insurance and medical: TK Techniker Krankenkasse, BKK, DFV dental, Arztbriefe, Rezepte, Laborbefunde, medical bills, Einkommensfragebogen TK, Beitragsbescheid",
+      "threshold": 0.42
+    },
+    {
+      "name": "Versicherung",
+      "description": "Insurance (non-health): Haftpflicht, Hausrat, KFZ-Versicherung, Berufsunfähigkeit BU, Rechtsschutz, life insurance, insurance policies and claims",
+      "threshold": 0.42
+    },
+    {
+      "name": "Reisekosten",
+      "description": "Business travel documents: Dienstreise, flight tickets, boarding passes, hotel Rechnungen, train tickets (DB, SNCF), taxi, rental car, Verpflegungspauschale records, Bewirtungsbelege for business meals during travel",
+      "threshold": 0.42,
+      "children": [
+        {"name": "Flug", "description": "Flight tickets, boarding passes, airline invoices, Lufthansa, easyJet, Ryanair", "threshold": 0.50},
+        {"name": "Hotel", "description": "Hotel invoices, Airbnb receipts, accommodation confirmations", "threshold": 0.50},
+        {"name": "Bahn", "description": "Train tickets, Deutsche Bahn, SNCF, BahnCard, Sparpreis", "threshold": 0.50},
+        {"name": "Bewirtung", "description": "Business meal receipts, Bewirtungsbeleg, restaurant bills with business purpose", "threshold": 0.50}
+      ]
+    },
+    {
+      "name": "Leasing",
+      "description": "Vehicle leasing: Leasingvertrag, monthly rates, KFZ inspection TÜV, car insurance, fuel receipts, parking, Kfz-Steuer",
+      "threshold": 0.45
+    },
+    {
+      "name": "Familie",
+      "description": "Family documents: Kindergeld, school (KKG, Elternportal), medical for David/Iudita/Dina, Lohnsteuerbescheinigung Dina, child-related correspondence, Kita, sport clubs",
+      "threshold": 0.40,
+      "children": [
+        {"name": "Schule", "description": "School correspondence, Elternportal KKG, Zeugnis, class trips, fees", "threshold": 0.50},
+        {"name": "Dina", "description": "Dina Satmarean documents: Lohnsteuerbescheinigung, employment, medical, personal", "threshold": 0.50},
+        {"name": "Kinder", "description": "David and Iudita: medical, school, Kindergeld, activities, sport", "threshold": 0.50}
+      ]
+    },
+    {
+      "name": "Lohnsteuer",
+      "description": "Employment tax documents: Lohnsteuerbescheinigung, Sozialversicherungsnachweis, Rentenversicherung, Arbeitgeberbescheinigung, pay stubs from Goodly Innovations, cloudWerkstatt",
+      "threshold": 0.45
+    },
+    {
+      "name": "Sonstiges",
+      "description": "Miscellaneous documents that don't fit other categories: newsletters, advertisements, informational letters, membership, Verein, Transparenzregister, IHK, misc correspondence",
+      "threshold": 0.35
+    },
+    {
+      "name": "Archives",
+      "description": "Compressed archives and backups: zip, tar, rar, 7z, database exports, old document bundles",
+      "threshold": 0.50
+    }
+  ]
+}

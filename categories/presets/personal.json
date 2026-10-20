@@ -1,0 +1,67 @@
+{
+  "_preset": "personal",
+  "_description": "Personal/family document archive. 10 shallow categories, YYYY-MM-DD naming.",
+  "_source": "Tuck 10-folder system + Paperarchive + Locument best practices (2026)",
+  "categories": [
+    {
+      "name": "Finance",
+      "description": "Financial documents: bank statements, credit cards, investments, loans, receipts, invoices, bills, budgets, payroll, pension",
+      "threshold": 0.40,
+      "children": [
+        {"name": "Banking", "description": "Bank and credit-card statements, transaction histories, account summaries, IBAN confirmations", "threshold": 0.50},
+        {"name": "Taxes", "description": "Tax returns, assessments, Steuerbescheid, Einkommensteuer, W2, T4, 1099, EÜR, Anlage, Finanzamt correspondence", "threshold": 0.50},
+        {"name": "Receipts", "description": "Purchase receipts, invoices, expense confirmations, order confirmations, Rechnungen", "threshold": 0.50},
+        {"name": "Investments", "description": "Brokerage statements, portfolio reports, dividend notices, DeGiro, trade confirmations", "threshold": 0.50}
+      ]
+    },
+    {
+      "name": "Legal",
+      "description": "Contracts, agreements, NDAs, leases, rental agreements, wills, power of attorney, notarial deeds, court documents, legal notices",
+      "threshold": 0.40,
+      "children": [
+        {"name": "Contracts", "description": "Signed contracts, rental agreements, Mietvertrag, employment contracts, service agreements", "threshold": 0.50},
+        {"name": "Government", "description": "Government letters, official notices, Bescheid, Vollstreckung, Pfändung, court orders, municipal correspondence", "threshold": 0.50}
+      ]
+    },
+    {
+      "name": "Health",
+      "description": "Medical records, prescriptions, doctor letters, lab results, insurance claims, Krankenkasse, dental, vision, fitness",
+      "threshold": 0.40
+    },
+    {
+      "name": "Identity",
+      "description": "Passports, ID cards, driver's license, birth certificates, marriage certificates, residence permits, visas, Aufenthaltstitel, Meldebescheinigung",
+      "threshold": 0.45
+    },
+    {
+      "name": "Employment",
+      "description": "Offer letters, employment contracts, pay stubs, Lohnsteuerbescheinigung, performance reviews, references, Arbeitszeugnis, termination letters",
+      "threshold": 0.40
+    },
+    {
+      "name": "Education",
+      "description": "Degrees, diplomas, transcripts, professional certifications, course certificates, training records, Zeugnis, continuing education",
+      "threshold": 0.42
+    },
+    {
+      "name": "Insurance",
+      "description": "Insurance policies, claims, coverage documents: health (TK, AOK), auto (KFZ), home (Hausrat), liability (Haftpflicht), life",
+      "threshold": 0.42
+    },
+    {
+      "name": "Property",
+      "description": "Lease, mortgage, Grundbuch, property deeds, home repairs, warranties, utilities, Nebenkostenabrechnung, Betriebskosten, vehicle registration, KFZ-Brief",
+      "threshold": 0.42
+    },
+    {
+      "name": "Travel",
+      "description": "Flight tickets, boarding passes, hotel bookings, itineraries, train tickets, car rental, visa applications, travel insurance",
+      "threshold": 0.45
+    },
+    {
+      "name": "Archives",
+      "description": "Compressed archives and installers: zip, tar, rar, 7z, dmg, iso, exe, msi, pkg",
+      "threshold": 0.50
+    }
+  ]
+}

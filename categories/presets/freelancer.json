@@ -1,0 +1,73 @@
+{
+  "_preset": "freelancer",
+  "_description": "IT freelancer / Freiberufler document archive. Covers invoicing, clients, tax, and personal mixed use.",
+  "_source": "German Steuerberater practice + EÜR structure + freelance best practices (2026)",
+  "categories": [
+    {
+      "name": "Clients",
+      "description": "Client-specific documents: contracts, SOWs, proposals, timesheets, deliverables, correspondence, NDAs",
+      "threshold": 0.40
+    },
+    {
+      "name": "Invoices",
+      "description": "Outgoing invoices (Rechnungen), credit notes (Gutschriften), invoice drafts, Odoo exports, e-Factura",
+      "threshold": 0.42
+    },
+    {
+      "name": "Expenses",
+      "description": "Business expenses: vendor bills, receipts, Bewirtungsaufwendungen, Reisekosten, office supplies, software licenses, hardware purchases",
+      "threshold": 0.42,
+      "children": [
+        {"name": "Travel", "description": "Reisekosten: flight tickets, hotel receipts, train tickets, taxi, mileage, Verpflegungspauschale, per diem", "threshold": 0.50},
+        {"name": "Office", "description": "Office expenses: rent, coworking, internet, phone, furniture, Arbeitszimmer", "threshold": 0.50},
+        {"name": "Equipment", "description": "Hardware, software, subscriptions, cloud services, domain names, hosting", "threshold": 0.50},
+        {"name": "Meals", "description": "Business meals, Bewirtungsbelege, restaurant receipts with business purpose noted", "threshold": 0.50}
+      ]
+    },
+    {
+      "name": "Tax",
+      "description": "Tax documents: Steuererklärung, EÜR, Umsatzsteuervoranmeldung, Einkommensteuer, Gewerbesteuer, Steuerbescheid, Finanzamt letters",
+      "threshold": 0.40,
+      "children": [
+        {"name": "Annual_Returns", "description": "Annual tax returns, EÜR, Anlage S, Anlage N, Steuererklärung, SteuerGo exports", "threshold": 0.50},
+        {"name": "VAT", "description": "Umsatzsteuervoranmeldung UStVA, Zusammenfassende Meldung ZM, reverse charge, e-Factura", "threshold": 0.50},
+        {"name": "Assessments", "description": "Steuerbescheid, Einkommensteuerbescheid, Vorauszahlungsbescheid, Finanzamt notices", "threshold": 0.50}
+      ]
+    },
+    {
+      "name": "Banking",
+      "description": "Bank statements, payment confirmations, SEPA transfers, PayPal, Wise, foreign currency transactions",
+      "threshold": 0.42
+    },
+    {
+      "name": "Insurance",
+      "description": "Professional liability (Berufshaftpflicht), health (Krankenversicherung), disability (BU), pension (Rentenversicherung), policies and claims",
+      "threshold": 0.42
+    },
+    {
+      "name": "Legal",
+      "description": "Business registration, Gewerbeschein, Finanzamt Fragebogen, trade license, DSGVO, terms of service, general contracts not client-specific",
+      "threshold": 0.42
+    },
+    {
+      "name": "Certifications",
+      "description": "Professional certifications, training certificates, conference badges, continuing education, ISO, AWS, RedHat, vendor certs",
+      "threshold": 0.45
+    },
+    {
+      "name": "Personal",
+      "description": "Personal documents mixed with business: ID, passport, health, family, property, non-business correspondence",
+      "threshold": 0.40,
+      "children": [
+        {"name": "Identity", "description": "Passport, Personalausweis, driver's license, birth certificate, Meldebescheinigung", "threshold": 0.50},
+        {"name": "Health", "description": "Medical records, prescriptions, Krankenkasse, dental, lab results", "threshold": 0.50},
+        {"name": "Property", "description": "Mietvertrag, Nebenkostenabrechnung, Betriebskosten, home insurance, utilities", "threshold": 0.50}
+      ]
+    },
+    {
+      "name": "Archives",
+      "description": "Compressed archives and backups: zip, tar, rar, 7z, dmg, database dumps",
+      "threshold": 0.50
+    }
+  ]
+}

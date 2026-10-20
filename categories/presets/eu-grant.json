@@ -1,0 +1,91 @@
+{
+  "_preset": "eu-grant",
+  "_description": "EU grant application dossier (PoCIDIF / PNRR / POCU / MySMIS). Maps to typical annex structure.",
+  "_source": "Ghid Solicitant PoCIDIF 2.1 (OIPSI 2026) + euroagency.ro checklist + indais.ro",
+  "categories": [
+    {
+      "name": "01_Cerere_Finantare",
+      "description": "Cerere de finantare MySMIS, formularul cererii, rezumat proiect, cod SMIS, formular depunere",
+      "threshold": 0.45
+    },
+    {
+      "name": "02_Plan_Afaceri",
+      "description": "Plan de afaceri, business plan, studiu fezabilitate, analiza SWOT, proiectii financiare, previziuni venituri, analiza piata",
+      "threshold": 0.45
+    },
+    {
+      "name": "03_Buget_Oferte",
+      "description": "Buget proiect, Anexa 6, justificari buget, oferte de pret, deviz, studii de piata, analize comparative, fundamentare costuri, facturi proforma",
+      "threshold": 0.40,
+      "children": [
+        {"name": "Buget", "description": "Buget detaliat, Anexa 6, fisiere Excel buget, rezumat cheltuieli, categorii de cheltuieli eligibile", "threshold": 0.50},
+        {"name": "Oferte_Semnate", "description": "Oferte de pret semnate, oferte stampilate, capturi de ecran semnate de reprezentantul legal, oferte furnizori cu semnatura", "threshold": 0.50},
+        {"name": "Oferte_Nesemnate", "description": "Oferte de pret nesemnate, capturi de ecran pret, screenshot-uri pagini web cu preturi, printscreen-uri", "threshold": 0.50}
+      ]
+    },
+    {
+      "name": "04_Declaratii",
+      "description": "Declaratii pe propria raspundere, Anexa 8 conflict de interese, declaratie efect stimulativ, declaratie IMM, declaratie ajutor de stat, declaratii eligibilitate, acord parteneriat",
+      "threshold": 0.42,
+      "children": [
+        {"name": "Anexa8_Conflict", "description": "Anexa 8 declaratie conflict de interese, formular lipsa conflict, declaratie independenta, Anexa 19", "threshold": 0.50},
+        {"name": "Declaratii_Eligibilitate", "description": "Declaratii eligibilitate solicitant, declaratie IMM incadrare, declaratie ajutor de stat, decizia asociat unic", "threshold": 0.50}
+      ]
+    },
+    {
+      "name": "05_Documente_Solicitant",
+      "description": "Documente firma solicitant: certificat constatator ONRC, CUI, act constitutiv, hotarare AGA, bilant, balanta verificare, certificat atestare fiscala, situatii financiare",
+      "threshold": 0.42,
+      "children": [
+        {"name": "ONRC_CUI", "description": "Certificat constatator, extras ONRC, CUI, cod unic inregistrare, act constitutiv, statut", "threshold": 0.50},
+        {"name": "Financiare", "description": "Bilant contabil, balanta de verificare, situatii financiare anuale, recipisa depunere bilant, S1003, S1005", "threshold": 0.50},
+        {"name": "Fiscale", "description": "Certificat atestare fiscala, cazier fiscal, certificat de inregistrare TVA", "threshold": 0.50}
+      ]
+    },
+    {
+      "name": "06_Echipa_Proiect",
+      "description": "Documente echipa proiect: CV-uri, diplome, certificate profesionale, contracte CIM, anexe salarizare, Anexa 9 grila, fise post",
+      "threshold": 0.40,
+      "children": [
+        {"name": "CV", "description": "CV-uri membri echipa, curriculum vitae, formular CV ACDA, rezumat experienta profesionala", "threshold": 0.50},
+        {"name": "Diplome_Certificate", "description": "Diplome licenta, master, doctorat, certificate profesionale, ISO, ITIL, CISA, atestari, calificari", "threshold": 0.50},
+        {"name": "CIM_Salarizare", "description": "Contracte individuale de munca CIM, anexe salarizare, Anexa 9 grila salarizare, fise post, decizii numire", "threshold": 0.50}
+      ]
+    },
+    {
+      "name": "07_Inovare_CDI",
+      "description": "Documente justificative inovare: brevete, cereri brevet, studii piata, analiza competitori, TRL, rezultate cercetare, publicatii, studii noutate",
+      "threshold": 0.45
+    },
+    {
+      "name": "08_Spatiu_Implementare",
+      "description": "Documente locatie implementare: contract comodat, contract inchiriere, extras carte funciara, autorizatie constructie, plan amplasament, sediu social, punct de lucru",
+      "threshold": 0.45
+    },
+    {
+      "name": "09_Monitorizare",
+      "description": "Documente planificare si monitorizare: calendar Gantt, plan implementare, indicatori, jaloane, rapoarte progres, plan achizitii",
+      "threshold": 0.45
+    },
+    {
+      "name": "10_Publicitate",
+      "description": "Materiale informare si publicitate: plan comunicare, oferte publicitate, diseminare, identitate vizuala, logo, banner",
+      "threshold": 0.45
+    },
+    {
+      "name": "11_Audit",
+      "description": "Audit tehnic si financiar: oferte audit, plan audit, raport audit, certificare audit, Annexa 19 independenta auditor",
+      "threshold": 0.45
+    },
+    {
+      "name": "12_Corespondenta",
+      "description": "Corespondenta proiect: emailuri, notificari, minute sedinta, procese verbale, solicitari clarificari, raspunsuri evaluator",
+      "threshold": 0.42
+    },
+    {
+      "name": "Archives",
+      "description": "Fisiere comprimate: zip, rar, 7z, tar.gz cu documente vechi sau backup-uri",
+      "threshold": 0.50
+    }
+  ]
+}
