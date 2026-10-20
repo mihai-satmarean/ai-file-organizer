@@ -177,7 +177,19 @@ class LLMClassifier:
         for i, content in enumerate(contents):
             snippet = content.combined_content[: self.max_chars_per_file]
             snippet = " ".join(snippet.split())  # collapse whitespace to save tokens
-            lines.append(f"[{i}] name={content.file_path.name!r}\n    content: {snippet}")
+
+            # Surface digital-signature status so the LLM can factor it into
+            # both category and rename decisions.
+            sig_tag = ""
+            if content.metadata.get("digital_signature"):
+                count = content.metadata.get("digital_signature_count", 1)
+                sig_tag = f" [DIGITALLY SIGNED: {count} signature(s)]"
+            elif content.metadata.get("digital_signature_empty_fields"):
+                sig_tag = " [SIGNATURE FIELD PRESENT — NOT YET SIGNED]"
+
+            lines.append(
+                f"[{i}] name={content.file_path.name!r}{sig_tag}\n    content: {snippet}"
+            )
         return "\n".join(lines)
 
     def _user_payload(self, contents: list[ExtractedContent]):
@@ -192,7 +204,13 @@ class LLMClassifier:
         parts: list[dict] = [{"type": "text", "text": "Classify these files:\n"}]
         any_image = False
         for i, content in enumerate(contents):
-            label = f"[{i}] name={content.file_path.name!r}"
+            sig_tag = ""
+            if content.metadata.get("digital_signature"):
+                count = content.metadata.get("digital_signature_count", 1)
+                sig_tag = f" [DIGITALLY SIGNED: {count} signature(s)]"
+            elif content.metadata.get("digital_signature_empty_fields"):
+                sig_tag = " [SIGNATURE FIELD PRESENT — NOT YET SIGNED]"
+            label = f"[{i}] name={content.file_path.name!r}{sig_tag}"
             image_part = None
             if is_image_path(content.file_path):
                 image_part = load_image_part(content.file_path, max_dim=self.vision_max_dim)

@@ -15,6 +15,41 @@ except ImportError:
     PYPDF2_AVAILABLE = False
 
 
+def _detect_digital_signature(reader) -> dict:
+    """
+    Detect cryptographic digital signatures in a PDF.
+
+    Returns a dict with:
+      - digital_signature: bool  — True if at least one /Sig field has a value (/V not None)
+      - digital_signature_count: int — number of completed sig fields
+      - digital_signature_empty_fields: int — sig placeholder fields without a value
+
+    Uses the AcroForm field approach: a /Sig field exists iff there is a form
+    field with /FT == /Sig; it is *completed* iff /V is not None.
+    A plain image of a signature on the page produces no /Sig field.
+    """
+    try:
+        fields = reader.get_fields() or {}
+    except Exception:
+        return {"digital_signature": False, "digital_signature_count": 0,
+                "digital_signature_empty_fields": 0}
+
+    signed = 0
+    empty = 0
+    for field in fields.values():
+        if field.get("/FT") == "/Sig":
+            if field.get("/V") is not None:
+                signed += 1
+            else:
+                empty += 1
+
+    return {
+        "digital_signature": signed > 0,
+        "digital_signature_count": signed,
+        "digital_signature_empty_fields": empty,
+    }
+
+
 class PDFExtractor(BaseExtractor):
     """Extract text content from PDF files."""
     
@@ -49,6 +84,10 @@ class PDFExtractor(BaseExtractor):
             
             num_pages = len(reader.pages)
             metadata["pages"] = num_pages
+
+            # Digital signature detection (cryptographic /Sig fields only;
+            # image-based signatures are not detectable this way)
+            metadata.update(_detect_digital_signature(reader))
             
             # Extract text from pages
             text_parts = []
