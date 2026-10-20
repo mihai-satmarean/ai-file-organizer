@@ -16,6 +16,8 @@ env/
 training_data.json
 organized/
 _logs/
+.organizer-progress.json
+.organizer-progress.tmp
 
 # OS / editor
 .DS_Store

@@ -79,6 +79,9 @@ class OrganizerConfig:
     git_init_repo: bool = False            # init git repo if not already one
     git_lfs_patterns: list[str] = field(default_factory=lambda: ['*.pdf', '*.docx', '*.xlsx', '*.pptx'])
 
+    # Checkpoint / resume
+    resume: bool = False  # resume from checkpoint, skipping already-processed files
+
     create_logs: bool = True
     create_undo_script: bool = True
 

@@ -26,6 +26,7 @@ from categories import create_default_categories, CategoryTree
 from extractors import ExtractorRegistry
 from classifier import HierarchicalClassifier
 from organizer import DirectoryScanner, FileMover
+from organizer.checkpoint import OrganizeCheckpoint
 
 
 class FileOrganizer:
@@ -185,7 +186,26 @@ class FileOrganizer:
         print(f"   Successfully extracted: {len(extracted_contents)}")
         if extraction_errors:
             print(f"   Extraction errors: {len(extraction_errors)}")
-        
+
+        # Checkpoint: register files and filter if resuming
+        input_base = Path(input_dirs[0] if input_dirs else self.config.input_directories[0]).resolve()
+        checkpoint = OrganizeCheckpoint(input_base, output_directory)
+        checkpoint.register_files([c.file_path for c in extracted_contents])
+
+        if self.config.resume:
+            pending = set(checkpoint.get_pending())
+            original_count = len(extracted_contents)
+            extracted_contents = [
+                c for c in extracted_contents
+                if str(c.file_path.resolve().relative_to(input_base)) in pending
+            ]
+            skipped = original_count - len(extracted_contents)
+            if skipped:
+                print(f"   Resumed: skipping {skipped} already-processed files")
+            if not extracted_contents:
+                print("   All files already processed. Use --reset-progress to start fresh.")
+                return {"status": "complete", "checkpoint": checkpoint.summary()}
+
         # Spend guard: refuse oversized LLM runs before building the provider.
         if self.config.backend == "llm" and self.config.llm_max_files:
             n = len(extracted_contents)
@@ -211,7 +231,14 @@ class FileOrganizer:
             (content.file_path, result.category_path, result.final_confidence, result.new_name, content.metadata)
             for content, result in zip(extracted_contents, results)
         ]
-        
+
+        # Update checkpoint with classification results
+        for content, result in zip(extracted_contents, results):
+            rel = str(content.file_path.resolve().relative_to(input_base))
+            checkpoint.mark_done(rel, result.category_path, result.new_name, result.final_confidence)
+        checkpoint.save_batch()
+        print(f"   {checkpoint.summary()}")
+
         # Show classification summary
         category_counts = {}
         for item in classifications:
@@ -671,6 +698,20 @@ API keys are read from environment variables or a .env file (never stored).
     )
 
     parser.add_argument(
+        "--resume",
+        action="store_true",
+        default=False,
+        help="Resume from checkpoint. Skips already-processed files."
+    )
+
+    parser.add_argument(
+        "--reset-progress",
+        action="store_true",
+        default=False,
+        help="Clear checkpoint and start fresh."
+    )
+
+    parser.add_argument(
         "--exclude",
         action="append",
         default=[],
@@ -768,6 +809,8 @@ API keys are read from environment variables or a .env file (never stored).
         config.git_init_repo = True
     if args.no_notice:
         config.show_data_notice = False
+    if args.resume:
+        config.resume = True
     # Exclude globs come from --exclude and any .organizerignore in the inputs.
     config.exclude_patterns = _read_ignore_patterns(config.input_directories, args.exclude)
 
@@ -799,6 +842,16 @@ API keys are read from environment variables or a .env file (never stored).
             print(f"\n❌ {e}")
             sys.exit(1)
         return
+
+    # Clear checkpoint if requested
+    if args.reset_progress:
+        cp = OrganizeCheckpoint(Path(args.input).resolve(), Path(args.output).resolve())
+        cp.clear()
+        print("Checkpoint cleared — starting fresh.")
+        if not args.resume:
+            # --reset-progress without other action: just clear and exit
+            if len(sys.argv) <= 3:
+                return
 
     # Create organizer
     organizer = FileOrganizer(config)
