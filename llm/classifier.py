@@ -51,6 +51,7 @@ _RESULT_SCHEMA = {
                     "index": {"type": "integer"},
                     "path": {"type": "string"},
                     "confidence": {"type": "number"},
+                    "new_name": {"type": "string"},
                 },
                 "required": ["index", "path", "confidence"],
                 "additionalProperties": False,
@@ -97,6 +98,8 @@ class LLMClassifier:
         vision: bool = True,
         vision_max_dim: int = 1024,
         concurrency: int = 4,
+        rename: bool = False,
+        rename_format: str = "YYYY-MM-DD_Sender_Description.ext",
     ):
         self.category_tree = category_tree
         self.provider = provider
@@ -104,14 +107,12 @@ class LLMClassifier:
         self.concurrency = max(1, concurrency)
         self.max_chars_per_file = max_chars_per_file
         self.max_output_tokens = max_output_tokens
-        # Files the model places with confidence below this go to `review_folder`
-        # instead of being filed (set 0.0 to disable).
         self.min_confidence = min_confidence
         self.review_folder = review_folder
-        # When enabled, image files are sent to the model as actual (downscaled)
-        # images so they're classified by content, not just filename.
         self.vision = vision
         self.vision_max_dim = vision_max_dim
+        self._rename = rename
+        self._rename_format = rename_format
 
         # Precompute once: the outline (system prompt) and the valid-path index.
         self._outline_text = _outline(category_tree)
@@ -136,6 +137,19 @@ class LLMClassifier:
     # ---- prompt construction -------------------------------------------------
 
     def _system_prompt(self) -> str:
+        rename_rules = ""
+        if getattr(self, "_rename", False):
+            fmt = getattr(self, "_rename_format", "YYYY-MM-DD_Sender_Description.ext")
+            rename_rules = (
+                f'\n6. Also propose a "new_name" for each file following this format: {fmt}\n'
+                "   Rules for new_name:\n"
+                "   - Date: use the document date (YYYY-MM-DD); today if not found\n"
+                "   - Sender/source: short CamelCase or hyphenated name\n"
+                "   - Description: 2-4 words matching content\n"
+                "   - Preserve original file extension\n"
+                "   - No spaces, no special chars except hyphens and underscores\n"
+                '   Include "new_name" in every result entry.\n'
+            )
         return (
             "You are a file organizer. Classify each file into exactly one folder "
             "from the category tree below.\n\n"
@@ -149,9 +163,12 @@ class LLMClassifier:
             "parent's 'Other' subfolder (e.g. 'School/University/Other').\n"
             "3. If nothing fits at the top level, use 'Other'.\n"
             "4. Use the full path with '/' separators, exactly matching names in the tree.\n"
-            "5. confidence is your certainty from 0.0 to 1.0.\n\n"
+            "5. confidence is your certainty from 0.0 to 1.0."
+            f"{rename_rules}\n\n"
             "Respond with ONLY a JSON object of the form:\n"
-            '{"results": [{"index": <int>, "path": "<folder/path>", "confidence": <0..1>}]}\n'
+            '{"results": [{"index": <int>, "path": "<folder/path>", "confidence": <0..1>'
+            + (', "new_name": "<filename.ext>"' if getattr(self, "_rename", False) else "")
+            + "}]}\n"
             "Include one entry for every file index given, and nothing else."
         )
 
@@ -299,6 +316,16 @@ class LLMClassifier:
             # Route uncertain placements to a Review folder instead of filing them.
             if self.min_confidence > 0.0 and confidence < self.min_confidence:
                 path, is_other = self.review_folder, False
+            # Extract proposed rename if requested and the LLM returned one.
+            new_name: Optional[str] = None
+            if self._rename:
+                raw_name = str(entry.get("new_name", "")).strip().strip('"\'')
+                if raw_name and "/" not in raw_name and "\\" not in raw_name:
+                    # Ensure extension is preserved if LLM dropped it.
+                    orig_ext = content.file_path.suffix
+                    if orig_ext and not raw_name.endswith(orig_ext):
+                        raw_name = raw_name.rsplit(".", 1)[0] + orig_ext
+                    new_name = raw_name
             results.append(ClassificationResult(
                 file_path=str(content.file_path),
                 category_path=path,
@@ -306,6 +333,7 @@ class LLMClassifier:
                 final_confidence=confidence,
                 is_other=is_other,
                 classification_chain=path.split("/"),
+                new_name=new_name,
             ))
         return results
 

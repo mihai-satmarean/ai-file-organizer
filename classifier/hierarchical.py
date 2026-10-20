@@ -24,6 +24,7 @@ class ClassificationResult:
     final_confidence: float  # Confidence of the final classification
     is_other: bool  # Whether it ended up in an "Other" folder
     classification_chain: list[str]  # The categories matched at each level
+    new_name: Optional[str] = None  # LLM-proposed rename (None = keep original)
 
 
 class HierarchicalClassifier:

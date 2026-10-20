@@ -71,6 +71,8 @@ class OrganizerConfig:
     dry_run: bool = False
     copy_instead_of_move: bool = False
     handle_duplicates: str = "rename"  # "rename", "skip", "overwrite"
+    llm_rename: bool = False            # ask the LLM to also propose a new filename
+    llm_rename_format: str = "YYYY-MM-DD_Sender_Description.ext"  # format hint
     create_logs: bool = True
     create_undo_script: bool = True
 

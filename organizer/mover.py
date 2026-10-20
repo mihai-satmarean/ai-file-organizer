@@ -101,24 +101,27 @@ class FileMover:
         self,
         source_path: Path,
         category_path: str,
-        confidence: float
+        confidence: float,
+        new_name: Optional[str] = None,
     ) -> MoveOperation:
         """
         Move/copy a single file to its category folder.
-        
+
         Args:
             source_path: Path to the source file.
             category_path: Category path like "School/University/CS246".
             confidence: Classification confidence score.
-            
+            new_name: Optional LLM-proposed filename; uses original name if None.
+
         Returns:
             MoveOperation with the result.
         """
         source_path = Path(source_path)
-        
-        # Build destination path
+
+        # Build destination path — use LLM-proposed name when available.
         dest_dir = self.output_directory / category_path
-        dest_path = dest_dir / source_path.name
+        dest_filename = new_name if new_name else source_path.name
+        dest_path = dest_dir / dest_filename
         
         # Handle duplicates
         if dest_path.exists():
@@ -177,7 +180,7 @@ class FileMover:
     
     def organize_files(
         self,
-        classifications: list[tuple[Path, str, float]],
+        classifications: list[tuple[Path, str, float] | tuple[Path, str, float, Optional[str]]],
         show_progress: bool = True
     ) -> OrganizationResult:
         """
@@ -206,8 +209,10 @@ class FileMover:
                 pass
 
         try:
-            for file_path, category_path, confidence in iterable:
-                op = self.organize_file(file_path, category_path, confidence)
+            for item in iterable:
+                file_path, category_path, confidence = item[0], item[1], item[2]
+                new_name = item[3] if len(item) > 3 else None
+                op = self.organize_file(file_path, category_path, confidence, new_name=new_name)
                 if op.success and not self.dry_run:
                     self._append_journal(op)
         except KeyboardInterrupt:

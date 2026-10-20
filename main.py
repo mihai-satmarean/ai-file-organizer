@@ -100,6 +100,8 @@ class FileOrganizer:
                 vision=self.config.llm_vision,
                 vision_max_dim=self.config.llm_vision_max_dim,
                 concurrency=self.config.llm_concurrency,
+                rename=self.config.llm_rename,
+                rename_format=self.config.llm_rename_format,
             )
         else:
             from classifier import Embedder
@@ -206,7 +208,7 @@ class FileOrganizer:
 
         results = self.classifier.classify_batch(extracted_contents, show_progress=show_progress)
         classifications = [
-            (content.file_path, result.category_path, result.final_confidence)
+            (content.file_path, result.category_path, result.final_confidence, result.new_name)
             for content, result in zip(extracted_contents, results)
         ]
         
@@ -594,6 +596,23 @@ API keys are read from environment variables or a .env file (never stored).
     )
 
     parser.add_argument(
+        "--rename",
+        action="store_true",
+        default=False,
+        help="Ask the LLM to propose a new filename during classification (no extra API calls)."
+    )
+
+    parser.add_argument(
+        "--rename-format",
+        default=None,
+        metavar="FORMAT",
+        help=(
+            "Hint for the rename format, e.g. 'YYYY-MM-DD_Sender_Description.ext'. "
+            "Passed verbatim to the LLM. Requires --rename."
+        )
+    )
+
+    parser.add_argument(
         "--exclude",
         action="append",
         default=[],
@@ -681,6 +700,10 @@ API keys are read from environment variables or a .env file (never stored).
         config.llm_max_files = args.max_files
     if args.concurrency is not None:
         config.llm_concurrency = args.concurrency
+    if args.rename:
+        config.llm_rename = True
+    if args.rename_format:
+        config.llm_rename_format = args.rename_format
     if args.no_notice:
         config.show_data_notice = False
     # Exclude globs come from --exclude and any .organizerignore in the inputs.
