@@ -208,7 +208,7 @@ class FileOrganizer:
 
         results = self.classifier.classify_batch(extracted_contents, show_progress=show_progress)
         classifications = [
-            (content.file_path, result.category_path, result.final_confidence, result.new_name)
+            (content.file_path, result.category_path, result.final_confidence, result.new_name, content.metadata)
             for content, result in zip(extracted_contents, results)
         ]
         
@@ -254,6 +254,13 @@ class FileOrganizer:
             print("✅ Organization Complete!")
         print("=" * 60)
         print(org_result.get_summary())
+
+        if self.config.dry_run:
+            print('\nPlanned operations:')
+            print(org_result.get_detailed_plan())
+
+        if org_result.log_path:
+            print(f"\n📋 Log: {org_result.log_path}")
 
         if org_result.undo_path:
             print(f"\n🔄 Undo script: {org_result.undo_path}")

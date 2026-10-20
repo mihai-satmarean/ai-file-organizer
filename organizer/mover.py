@@ -23,6 +23,7 @@ class MoveOperation:
     confidence: float
     success: bool = False
     error_message: Optional[str] = None
+    metadata: dict = field(default_factory=dict)
     timestamp: datetime = field(default_factory=datetime.now)
 
 
@@ -58,6 +59,20 @@ class OrganizationResult:
                 if not op.success:
                     lines.append(f"  - {op.source_path.name}: {op.error_message}")
         
+        return "\n".join(lines)
+
+    def get_detailed_plan(self) -> str:
+        """Return a per-file plan showing source, category, rename, and confidence."""
+        lines: list[str] = []
+        for op in self.operations:
+            src_name = op.source_path.name
+            dst_name = op.destination_path.name
+            entry = f"  {src_name} -> {op.category_path}"
+            if dst_name != src_name:
+                entry += f"  => {dst_name}"
+            pct = int(round(op.confidence * 100))
+            entry += f"  ({pct}%)"
+            lines.append(entry)
         return "\n".join(lines)
 
 
@@ -103,6 +118,7 @@ class FileMover:
         category_path: str,
         confidence: float,
         new_name: Optional[str] = None,
+        metadata: Optional[dict] = None,
     ) -> MoveOperation:
         """
         Move/copy a single file to its category folder.
@@ -146,7 +162,8 @@ class FileMover:
             source_path=source_path,
             destination_path=dest_path,
             category_path=category_path,
-            confidence=confidence
+            confidence=confidence,
+            metadata=metadata or {},
         )
         
         if self.dry_run:
@@ -180,7 +197,7 @@ class FileMover:
     
     def organize_files(
         self,
-        classifications: list[tuple[Path, str, float] | tuple[Path, str, float, Optional[str]]],
+        classifications: list[tuple[Path, str, float] | tuple[Path, str, float, Optional[str]] | tuple[Path, str, float, Optional[str], dict]],
         show_progress: bool = True
     ) -> OrganizationResult:
         """
@@ -212,7 +229,8 @@ class FileMover:
             for item in iterable:
                 file_path, category_path, confidence = item[0], item[1], item[2]
                 new_name = item[3] if len(item) > 3 else None
-                op = self.organize_file(file_path, category_path, confidence, new_name=new_name)
+                metadata = item[4] if len(item) > 4 else None
+                op = self.organize_file(file_path, category_path, confidence, new_name=new_name, metadata=metadata)
                 if op.success and not self.dry_run:
                     self._append_journal(op)
         except KeyboardInterrupt:
@@ -238,9 +256,10 @@ class FileMover:
 
         # Finalize: write the log and undo script even if we were interrupted,
         # so a partial run is still fully recoverable.
+        # Log is written for both real and dry-run; undo only for real runs.
+        if self.create_log:
+            result.log_path = self._write_log(result)
         if not self.dry_run:
-            if self.create_log:
-                result.log_path = self._write_log(result)
             if self.create_undo and not self.copy_instead_of_move:
                 result.undo_path = self.create_undo_script(result)
 
@@ -317,6 +336,7 @@ class FileMover:
 
         log_data = {
             "timestamp": timestamp,
+            "dry_run": self.dry_run,
             "summary": {
                 "total_files": result.total_files,
                 "successful_moves": result.successful_moves,
@@ -331,6 +351,7 @@ class FileMover:
                     "confidence": op.confidence,
                     "success": op.success,
                     "error": op.error_message,
+                    "metadata": op.metadata,
                 }
                 for op in result.operations
             ]
