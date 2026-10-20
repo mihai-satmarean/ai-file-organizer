@@ -29,6 +29,7 @@ class GitStatus:
     has_uncommitted: bool
     branch: str
     lfs_enabled: bool
+    repo_root: Optional[Path] = None
 
 
 # ---------------------------------------------------------------------------
@@ -125,6 +126,7 @@ def detect_git_repo(folder: Path) -> GitStatus:
         has_uncommitted=has_uncommitted,
         branch=branch,
         lfs_enabled=lfs_enabled,
+        repo_root=repo_root,
     )
 
 
@@ -192,16 +194,29 @@ def _build_commit_message(operations: list[MoveOperation]) -> str:
     return f"organize: {total} files ({parts})"
 
 
+def _repo_root(folder: Path) -> Optional[Path]:
+    """Return the git repo root for *folder*, or None."""
+    proc = _run_git("rev-parse", "--show-toplevel", cwd=folder)
+    if proc.returncode != 0:
+        return None
+    return Path(proc.stdout.strip())
+
+
 def git_commit_batch(
     folder: Path,
     operations: list[MoveOperation],
     dry_run: bool = False,
     message: Optional[str] = None,
 ) -> Optional[str]:
-    """Commit all changes in *folder* after an organisation run.
+    """Commit only the files touched by the organisation run.
+
+    When the organised folder is a subdirectory of a larger repo (e.g.
+    ``docs-skylite/_arhiva`` inside the ``acda`` repo), we stage only
+    the source and destination paths from the operations — never
+    ``git add --all`` which would pull in unrelated changes.
 
     Args:
-        folder: the git repo root (or any path inside it).
+        folder: the organised folder (or any path inside the repo).
         operations: list of :class:`MoveOperation` objects from the mover.
         dry_run: if ``True``, return the planned commit message without
             touching git.
@@ -217,21 +232,37 @@ def git_commit_batch(
     if dry_run:
         return msg
 
-    # Stage everything
-    add_proc = _run_git("add", "--all", cwd=folder)
+    repo_root = _repo_root(folder)
+    if repo_root is None:
+        return None
+
+    # Stage only the specific files that were moved/renamed.
+    paths_to_stage: list[str] = []
+    for op in operations:
+        if op.success:
+            paths_to_stage.append(str(op.source_path))
+            paths_to_stage.append(str(op.destination_path))
+
+    if not paths_to_stage:
+        return None
+
+    # git add the specific paths (source is deleted, dest is new)
+    add_proc = _run_git("add", "--", *paths_to_stage, cwd=repo_root)
     if add_proc.returncode != 0:
-        raise RuntimeError(f"git add failed: {add_proc.stderr.strip()}")
+        # Fallback: some source paths may no longer exist (moved away).
+        # Stage the whole organised folder instead (still scoped).
+        _run_git("add", "--all", str(folder), cwd=repo_root)
 
     # Bail out when the index is clean (nothing to commit)
-    diff = _run_git("diff", "--cached", "--quiet", cwd=folder)
+    diff = _run_git("diff", "--cached", "--quiet", cwd=repo_root)
     if diff.returncode == 0:
         return None
 
-    commit_proc = _run_git("commit", "-m", msg, cwd=folder)
+    commit_proc = _run_git("commit", "-m", msg, cwd=repo_root)
     if commit_proc.returncode != 0:
         raise RuntimeError(f"git commit failed: {commit_proc.stderr.strip()}")
 
-    sha_proc = _run_git("rev-parse", "HEAD", cwd=folder)
+    sha_proc = _run_git("rev-parse", "HEAD", cwd=repo_root)
     if sha_proc.returncode != 0:
         raise RuntimeError(f"git rev-parse HEAD failed: {sha_proc.stderr.strip()}")
 
@@ -241,9 +272,14 @@ def git_commit_batch(
 def git_pre_check(folder: Path) -> tuple[bool, str]:
     """Pre-flight safety check before organising inside a git repo.
 
+    Only checks for uncommitted changes *within the folder being
+    organised*, not the entire repo.  This matters when the folder is
+    a subdirectory of a larger monorepo (e.g. ``docs-skylite/_arhiva``
+    inside the ``acda`` project).
+
     Returns:
         ``(ok, reason)`` — ``ok`` is ``False`` when there are pre-existing
-        uncommitted changes that would be mixed into the organise commit.
+        uncommitted changes inside *folder*.
     """
     folder = Path(folder).resolve()
 
@@ -255,11 +291,13 @@ def git_pre_check(folder: Path) -> tuple[bool, str]:
     if not status.is_repo:
         return True, "not a git repository; no constraints"
 
-    if status.has_uncommitted:
+    # Check only files under this folder, not the whole repo.
+    porcelain = _run_git("status", "--porcelain", "--", str(folder), cwd=folder)
+    if porcelain.stdout.strip():
+        dirty_count = len(porcelain.stdout.strip().splitlines())
         return False, (
-            "there are uncommitted changes in the repository; "
-            "commit or stash them before organising so the organise "
-            "commit stays clean"
+            f"there are {dirty_count} uncommitted change(s) inside {folder.name}/; "
+            "commit or stash them first so the organise commit stays clean"
         )
 
     return True, "working tree is clean"
