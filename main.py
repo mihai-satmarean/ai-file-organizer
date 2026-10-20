@@ -267,6 +267,35 @@ class FileOrganizer:
             if org_result.interrupted:
                 print("   (run it to put the already-moved files back)")
 
+        # Git integration
+        if self.config.git_enabled or self.config.git_init_repo:
+            from organizer.git_integration import detect_git_repo, git_init, git_pre_check, git_commit_batch
+
+            target_dir = Path(output_directory)
+            status = detect_git_repo(target_dir)
+
+            if not status.is_repo and self.config.git_init_repo:
+                lfs = self.config.git_lfs_patterns if hasattr(args, 'git_lfs') and args.git_lfs else None
+                git_init(target_dir, lfs_patterns=lfs)
+                status = detect_git_repo(target_dir)
+                print(f'\nGit: initialized new repo in {target_dir}')
+
+            if status.is_repo and self.config.git_enabled:
+                if self.config.dry_run:
+                    planned = git_commit_batch(target_dir, org_result.operations, dry_run=True)
+                    print(f'\nGit (dry-run): would commit with message:')
+                    print(f'  {planned}')
+                else:
+                    ok, reason = git_pre_check(target_dir)
+                    if not ok:
+                        print(f'\nGit: skipped commit - {reason}')
+                    else:
+                        sha = git_commit_batch(target_dir, org_result.operations)
+                        if sha:
+                            print(f'\nGit: committed {sha[:8]}')
+                        else:
+                            print(f'\nGit: nothing to commit (no changes)')
+
         return {
             "status": "success",
             "scan_result": scan_result,
@@ -621,6 +650,27 @@ API keys are read from environment variables or a .env file (never stored).
     )
 
     parser.add_argument(
+        "--git",
+        action="store_true",
+        default=False,
+        help="Auto-commit changes after organizing (requires git repo)."
+    )
+
+    parser.add_argument(
+        "--git-init",
+        action="store_true",
+        default=False,
+        help="Initialize a git repo in the output folder if not already one."
+    )
+
+    parser.add_argument(
+        "--git-lfs",
+        action="store_true",
+        default=False,
+        help="Enable Git LFS for PDF/DOCX/XLSX/PPTX when using --git-init."
+    )
+
+    parser.add_argument(
         "--exclude",
         action="append",
         default=[],
@@ -712,6 +762,10 @@ API keys are read from environment variables or a .env file (never stored).
         config.llm_rename = True
     if args.rename_format:
         config.llm_rename_format = args.rename_format
+    if args.git:
+        config.git_enabled = True
+    if args.git_init:
+        config.git_init_repo = True
     if args.no_notice:
         config.show_data_notice = False
     # Exclude globs come from --exclude and any .organizerignore in the inputs.

@@ -73,6 +73,12 @@ class OrganizerConfig:
     handle_duplicates: str = "rename"  # "rename", "skip", "overwrite"
     llm_rename: bool = False            # ask the LLM to also propose a new filename
     llm_rename_format: str = "YYYY-MM-DD_Sender_Description.ext"  # format hint
+
+    # Git integration
+    git_enabled: bool = False              # auto-commit after organizing
+    git_init_repo: bool = False            # init git repo if not already one
+    git_lfs_patterns: list[str] = field(default_factory=lambda: ['*.pdf', '*.docx', '*.xlsx', '*.pptx'])
+
     create_logs: bool = True
     create_undo_script: bool = True
 
